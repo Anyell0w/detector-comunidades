@@ -1,0 +1,176 @@
+{
+  "timestamp": "2025-07-04T14:28:46.542490",
+  "graph_name": "Les Miserables Character Network",
+  "metrics": {
+    "modularity": 0.5654,
+    "num_communities": 6,
+    "community_sizes": [
+      10,
+      9,
+      6,
+      10,
+      25,
+      17
+    ],
+    "densities": [
+      0.2222,
+      0.8056,
+      1.0,
+      0.6667,
+      0.1467,
+      0.4853
+    ],
+    "avg_clustering": [
+      0.2067,
+      0.8806,
+      0.9405,
+      0.6403,
+      0.4159,
+      0.688
+    ],
+    "avg_degrees": [
+      2.3,
+      7.56,
+      6.33,
+      8.8,
+      5.48,
+      9.06
+    ],
+    "total_nodes": 77,
+    "total_edges": 254,
+    "graph_density": 0.0868
+  },
+  "communities": [
+    {
+      "id": 0,
+      "size": 10,
+      "members": [
+        "CountessDeLo",
+        "Geborand",
+        "Champtercier",
+        "Count",
+        "MlleBaptistine",
+        "MmeMagloire",
+        "Napoleon",
+        "Cravatte",
+        "OldMan",
+        "Myriel"
+      ],
+      "density": 0.2222,
+      "avg_clustering": 0.2067,
+      "avg_degree": 2.3
+    },
+    {
+      "id": 1,
+      "size": 9,
+      "members": [
+        "Favourite",
+        "Fameuil",
+        "Listolier",
+        "Marguerite",
+        "Tholomyes",
+        "Blacheville",
+        "Fantine",
+        "Dahlia",
+        "Zephine"
+      ],
+      "density": 0.8056,
+      "avg_clustering": 0.8806,
+      "avg_degree": 7.56
+    },
+    {
+      "id": 2,
+      "size": 6,
+      "members": [
+        "Brevet",
+        "Bamatabois",
+        "Judge",
+        "Chenildieu",
+        "Cochepaille",
+        "Champmathieu"
+      ],
+      "density": 1.0,
+      "avg_clustering": 0.9405,
+      "avg_degree": 6.33
+    },
+    {
+      "id": 3,
+      "size": 10,
+      "members": [
+        "Claquesous",
+        "Babet",
+        "Eponine",
+        "Thenardier",
+        "Boulatruelle",
+        "Brujon",
+        "Anzelma",
+        "Gueulemer",
+        "Montparnasse",
+        "MmeThenardier"
+      ],
+      "density": 0.6667,
+      "avg_clustering": 0.6403,
+      "avg_degree": 8.8
+    },
+    {
+      "id": 4,
+      "size": 25,
+      "members": [
+        "Woman1",
+        "Isabeau",
+        "MotherInnocent",
+        "MmeDeR",
+        "Gribier",
+        "Valjean",
+        "Simplice",
+        "Pontmercy",
+        "Woman2",
+        "Magnon",
+        "Javert",
+        "Labarre",
+        "MlleGillenormand",
+        "Scaufflaire",
+        "Cosette",
+        "MmePontmercy",
+        "Perpetue",
+        "BaronessT",
+        "Gillenormand",
+        "MlleVaubois",
+        "Marius",
+        "Gervais",
+        "Toussaint",
+        "Fauchelevent",
+        "LtGillenormand"
+      ],
+      "density": 0.1467,
+      "avg_clustering": 0.4159,
+      "avg_degree": 5.48
+    },
+    {
+      "id": 5,
+      "size": 17,
+      "members": [
+        "Feuilly",
+        "Jondrette",
+        "MmeHucheloup",
+        "Grantaire",
+        "Courfeyrac",
+        "Gavroche",
+        "Mabeuf",
+        "Joly",
+        "Combeferre",
+        "Bahorel",
+        "Enjolras",
+        "Prouvaire",
+        "Bossuet",
+        "MmeBurgon",
+        "Child2",
+        "MotherPlutarch",
+        "Child1"
+      ],
+      "density": 0.4853,
+      "avg_clustering": 0.688,
+      "avg_degree": 9.06
+    }
+  ]
+}

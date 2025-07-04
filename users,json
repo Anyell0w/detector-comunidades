@@ -1,0 +1,14 @@
+{
+  "admin": {
+    "password": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+    "role": "admin",
+    "created_at": "2025-01-01T00:00:00.000000",
+    "last_login": null
+  },
+  "user": {
+    "password": "0a041b9462caa4a31bac3567e0b6e6fd9100787db2ab433d96f6d178cabfce90",
+    "role": "user",
+    "created_at": "2025-01-01T00:00:00.000000",
+    "last_login": null
+  }
+}

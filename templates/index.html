@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Detector</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .progress-bar {
+            transition: width 0.3s ease-in-out;
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        
+        .fade-in.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .loading-spinner {
+            border: 2px solid #f3f4f6;
+            border-top: 2px solid #6b7280;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .admin-only {
+            display: none;
+        }
+        
+        .admin-only.show {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Barra de progreso -->
+    <div id="progress-container" class="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50 hidden">
+        <div id="progress-bar" class="h-full bg-indigo-600 progress-bar" style="width: 0%"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold text-gray-900">Community Detector</h1>
+                    </div>
+                    <div class="ml-4">
+                        <span id="user-info" class="text-sm text-gray-600">
+                            <span id="user-role" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                <!-- Role will be set by JavaScript -->
+                            </span>
+                            <span id="user-name" class="ml-2 font-medium">
+                                <!-- Username will be set by JavaScript -->
+                            </span>
+                        </span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="export-btn" class="admin-only inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                        </svg>
+                        Exportar
+                    </button>
+                    <button id="view-latest-btn" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        Ver Último Resultado
+                    </button>
+                    <button id="logout-btn" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                        Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- User Info Banner -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-blue-800">
+                        <span class="font-medium">Bienvenido</span> - 
+                        <span id="user-welcome-role">
+                            <!-- Role description will be set by JavaScript -->
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dataset Selection (Admin Only) -->
+        <div id="dataset-section" class="admin-only bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Seleccionar Dataset</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button class="dataset-btn p-4 border-2 border-gray-200 rounded-lg hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" data-dataset="karate">
+                    <div class="text-center">
+                        <div class="text-3xl mb-2">🥋</div>
+                        <h3 class="font-medium text-gray-900">Karate Club</h3>
+                        <p class="text-sm text-gray-500">Red social clásica</p>
+                    </div>
+                </button>
+                <button class="dataset-btn p-4 border-2 border-gray-200 rounded-lg hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" data-dataset="les_miserables">
+                    <div class="text-center">
+                        <div class="text-3xl mb-2">📚</div>
+                        <h3 class="font-medium text-gray-900">Les Miserables</h3>
+                        <p class="text-sm text-gray-500">Red de personajes</p>
+                    </div>
+                </button>
+                <button class="dataset-btn p-4 border-2 border-gray-200 rounded-lg hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" data-dataset="synthetic">
+                    <div class="text-center">
+                        <div class="text-3xl mb-2">🔗</div>
+                        <h3 class="font-medium text-gray-900">Sintética</h3>
+                        <p class="text-sm text-gray-500">Red generada</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Graph Info -->
+        <div id="graph-info" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8 hidden fade-in">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Información del Grafo</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-indigo-600" id="nodes-count">-</div>
+                    <div class="text-sm text-gray-500">Nodos</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-indigo-600" id="edges-count">-</div>
+                    <div class="text-sm text-gray-500">Aristas</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-indigo-600" id="density-value">-</div>
+                    <div class="text-sm text-gray-500">Densidad</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-indigo-600" id="graph-name">-</div>
+                    <div class="text-sm text-gray-500">Dataset</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Algorithm Selection (Admin Only) -->
+        <div id="algorithm-section" class="admin-only bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8 hidden fade-in">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Algoritmo de Detección</h2>
+            <div class="space-y-4">
+                <div class="flex items-center space-x-3">
+                    <input id="louvain" name="algorithm" type="radio" value="louvain" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" checked>
+                    <label for="louvain" class="text-sm font-medium text-gray-700">Louvain</label>
+                    <span class="text-xs text-gray-500">Rápido y eficiente</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <input id="girvan-newman" name="algorithm" type="radio" value="girvan_newman" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                    <label for="girvan-newman" class="text-sm font-medium text-gray-700">Girvan-Newman</label>
+                    <span class="text-xs text-gray-500">Basado en intermediación</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <input id="label-propagation" name="algorithm" type="radio" value="label_propagation" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                    <label for="label-propagation" class="text-sm font-medium text-gray-700">Label Propagation</label>
+                    <span class="text-xs text-gray-500">Propagación de etiquetas</span>
+                </div>
+            </div>
+            <div class="mt-6">
+                <button id="detect-btn" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <span id="detect-text">Detectar Comunidades</span>
+                    <div id="detect-spinner" class="loading-spinner ml-2 hidden"></div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results-section" class="hidden fade-in">
+            <!-- Metrics -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+                <h2 class="text-lg font-medium text-gray-900 mb-4">Métricas de Evaluación</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600" id="modularity-value">-</div>
+                        <div class="text-sm text-gray-500">Modularidad</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600" id="communities-count">-</div>
+                        <div class="text-sm text-gray-500">Comunidades</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600" id="avg-size">-</div>
+                        <div class="text-sm text-gray-500">Tamaño Promedio</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600" id="largest-community">-</div>
+                        <div class="text-sm text-gray-500">Comunidad Más Grande</div>
+                    </div>
+                </div>
+                <div class="mt-4 text-center">
+                    <span class="text-sm text-gray-500">Última actualización: </span>
+                    <span id="last-update" class="text-sm font-medium text-gray-700">-</span>
+                </div>
+            </div>
+
+            <!-- Visualization -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+                <h2 class="text-lg font-medium text-gray-900 mb-4">Visualización</h2>
+                <div class="text-center">
+                    <img id="graph-image" src="" alt="Grafo de comunidades" class="max-w-full h-auto rounded-lg mx-auto">
+                </div>
+            </div>
+
+            <!-- Communities Details -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-4">Detalles de Comunidades</h2>
+                <div id="communities-list" class="space-y-4">
+                    <!-- Communities will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="hidden text-center py-12">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-gray-600">Procesando...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-state" class="hidden bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">Error</h3>
+                    <p id="error-message" class="mt-1 text-sm text-red-700"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Variables globales
+        let currentUser = null;
+        let currentDataset = null;
+        let currentResults = null;
+
+        // Elementos del DOM
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const datasetBtns = document.querySelectorAll('.dataset-btn');
+        const graphInfo = document.getElementById('graph-info');
+        const algorithmSection = document.getElementById('algorithm-section');
+        const detectBtn = document.getElementById('detect-btn');
+        const detectText = document.getElementById('detect-text');
+        const detectSpinner = document.getElementById('detect-spinner');
+        const resultsSection = document.getElementById('results-section');
+        const loadingState = document.getElementById('loading-state');
+        const errorState = document.getElementById('error-state');
+        const exportBtn = document.getElementById('export-btn');
+        const viewLatestBtn = document.getElementById('view-latest-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // Inicializar aplicación
+        async function initApp() {
+            try {
+                const response = await fetch('/api/current_user');
+                const data = await response.json();
+                
+                if (data.user) {
+                    currentUser = data.user;
+                    setupUserInterface();
+                } else {
+                    window.location.href = '/login';
+                }
+            } catch (error) {
+                console.error('Error al cargar usuario:', error);
+                window.location.href = '/login';
+            }
+        }
+
+        function setupUserInterface() {
+            // Configurar información del usuario
+            document.getElementById('user-name').textContent = currentUser.username;
+            document.getElementById('user-role').textContent = currentUser.role.toUpperCase();
+            
+            if (currentUser.role === 'admin') {
+                document.getElementById('user-role').className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800';
+                document.getElementById('user-welcome-role').textContent = 'Tienes acceso completo a todas las funciones';
+                
+                // Mostrar elementos solo para admin
+                document.querySelectorAll('.admin-only').forEach(el => {
+                    el.classList.add('show');
+                });
+            } else {
+                document.getElementById('user-role').className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
+                document.getElementById('user-welcome-role').textContent = 'Puedes ver los resultados de detección de comunidades';
+            }
+        }
+
+        // Funciones de utilidad
+        function showProgress() {
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = '0%';
+        }
+
+        function updateProgress(percent) {
+            progressBar.style.width = percent + '%';
+        }
+
+        function hideProgress() {
+            setTimeout(() => {
+                progressContainer.classList.add('hidden');
+            }, 300);
+        }
+
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            errorState.classList.remove('hidden');
+            setTimeout(() => {
+                errorState.classList.add('hidden');
+            }, 5000);
+        }
+
+        function showElement(element) {
+            element.classList.remove('hidden');
+            setTimeout(() => {
+                element.classList.add('show');
+            }, 10);
+        }
+
+        function hideElement(element) {
+            element.classList.remove('show');
+            setTimeout(() => {
+                element.classList.add('hidden');
+            }, 300);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function displayResults(data, isLatest = false) {
+            // Actualizar métricas
+            document.getElementById('modularity-value').textContent = data.metrics.modularity;
+            document.getElementById('communities-count').textContent = data.metrics.num_communities;
+            document.getElementById('avg-size').textContent = Math.round(data.metrics.total_nodes / data.metrics.num_communities);
+            document.getElementById('largest-community').textContent = Math.max(...data.metrics.community_sizes);
+            
+            // Actualizar timestamp
+            if (data.timestamp) {
+                document.getElementById('last-update').textContent = formatDate(data.timestamp);
+            }
+            
+            // Mostrar imagen del grafo
+            const graphImage = document.getElementById('graph-image');
+            if (isLatest) {
+                graphImage.src = '/static/current_graph.png?t=' + new Date().getTime();
+            } else {
+                graphImage.src = data.graph_path + '?t=' + new Date().getTime();
+            }
+            
+            // Actualizar información del grafo si está disponible
+            if (data.graph_name) {
+                document.getElementById('graph-name').textContent = data.graph_name;
+            }
+            if (data.metrics.total_nodes) {
+                document.getElementById('nodes-count').textContent = data.metrics.total_nodes;
+            }
+            if (data.metrics.total_edges) {
+                document.getElementById('edges-count').textContent = data.metrics.total_edges;
+            }
+            if (data.metrics.graph_density) {
+                document.getElementById('density-value').textContent = data.metrics.graph_density;
+            }
+            
+            // Mostrar detalles de comunidades
+            const communitiesList = document.getElementById('communities-list');
+            communitiesList.innerHTML = '';
+            
+            data.communities.forEach((community, index) => {
+                const communityDiv = document.createElement('div');
+                communityDiv.className = 'bg-gray-50 rounded-lg p-4';
+                communityDiv.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-medium text-gray-900">Comunidad ${index + 1}</h3>
+                        <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded">${community.size} miembros</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-500">Densidad:</span>
+                            <span class="font-medium">${community.density}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Clustering:</span>
+                            <span class="font-medium">${community.avg_clustering}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Grado Promedio:</span>
+                            <span class="font-medium">${community.avg_degree}</span>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <span class="text-gray-500 text-sm">Miembros:</span>
+                        <span class="text-sm">${community.members.join(', ')}</span>
+                    </div>
+                `;
+                communitiesList.appendChild(communityDiv);
+            });
+            
+            // Mostrar secciones relevantes
+            showElement(graphInfo);
+            showElement(resultsSection);
+            
+            if (currentUser.role === 'admin') {
+                exportBtn.classList.remove('hidden');
+            }
+        }
+
+        // Event listeners para datasets (solo admin)
+        datasetBtns.forEach(btn => {
+            btn.addEventListener('click', async function() {
+                if (currentUser.role !== 'admin') {
+                    showError('No tienes permisos para cargar datasets');
+                    return;
+                }
+                
+                const dataset = this.dataset.dataset;
+                
+                // Actualizar UI
+                datasetBtns.forEach(b => b.classList.remove('border-indigo-500', 'ring-2', 'ring-indigo-500'));
+                this.classList.add('border-indigo-500', 'ring-2', 'ring-indigo-500');
+                
+                // Mostrar progreso
+                showProgress();
+                updateProgress(30);
+                
+                try {
+                    const response = await fetch('/api/load_dataset', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ dataset })
+                    });
+                    
+                    updateProgress(70);
+                    const data = await response.json();
+                    
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    
+                    if (data.success) {
+                        currentDataset = dataset;
+                        
+                        // Actualizar información del grafo
+                        document.getElementById('nodes-count').textContent = data.graph_info.nodes;
+                        document.getElementById('edges-count').textContent = data.graph_info.edges;
+                        document.getElementById('density-value').textContent = data.graph_info.density;
+                        document.getElementById('graph-name').textContent = data.graph_info.name;
+                        
+                        // Mostrar secciones
+                        showElement(graphInfo);
+                        showElement(algorithmSection);
+                        
+                        // Ocultar resultados previos
+                        hideElement(resultsSection);
+                        exportBtn.classList.add('hidden');
+                        
+                        updateProgress(100);
+                    } else {
+                        showError(data.error || 'Error al cargar el dataset');
+                    }
+                } catch (error) {
+                    showError('Error de conexión: ' + error.message);
+                }
+                
+                hideProgress();
+            });
+        });
+
+        // Event listener para detección de comunidades (solo admin)
+        detectBtn.addEventListener('click', async function() {
+            if (currentUser.role !== 'admin') {
+                showError('No tienes permisos para ejecutar detección de comunidades');
+                return;
+            }
+            
+            const algorithm = document.querySelector('input[name="algorithm"]:checked').value;
+            
+            // Actualizar UI
+            detectText.textContent = 'Procesando...';
+            detectSpinner.classList.remove('hidden');
+            detectBtn.disabled = true;
+            
+            // Mostrar progreso
+            showProgress();
+            updateProgress(20);
+            
+            try {
+                const response = await fetch('/api/detect_communities', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ algorithm })
+                });
+                
+                updateProgress(60);
+                const data = await response.json();
+                
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+                
+                if (data.success) {
+                    currentResults = data;
+                    displayResults(data);
+                    updateProgress(100);
+                } else {
+                    showError(data.error || 'Error al detectar comunidades');
+                }
+            } catch (error) {
+                showError('Error de conexión: ' + error.message);
+            }
+            
+            // Restaurar botón
+            detectText.textContent = 'Detectar Comunidades';
+            detectSpinner.classList.add('hidden');
+            detectBtn.disabled = false;
+            
+            hideProgress();
+        });
+
+        // Event listener para ver último resultado
+        viewLatestBtn.addEventListener('click', async function() {
+            showProgress();
+            updateProgress(30);
+            
+            try {
+                const response = await fetch('/api/view_latest_result');
+                const data = await response.json();
+                
+                updateProgress(70);
+                
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+                
+                if (data.success) {
+                    displayResults(data.result, true);
+                    updateProgress(100);
+                } else {
+                    showError(data.error || 'No hay resultados disponibles');
+                }
+            } catch (error) {
+                showError('Error de conexión: ' + error.message);
+            }
+            
+            hideProgress();
+        });
+
+        // Event listener para exportar (solo admin)
+        exportBtn.addEventListener('click', async function() {
+            if (currentUser.role !== 'admin') {
+                showError('No tienes permisos para exportar resultados');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/export_results');
+                const data = await response.json();
+                
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+                
+                if (data.success) {
+                    alert('Resultados exportados exitosamente a: ' + data.filepath);
+                } else {
+                    showError(data.error || 'Error al exportar resultados');
+                }
+            } catch (error) {
+                showError('Error de conexión: ' + error.message);
+            }
+        });
+
+        // Event listener para logout
+        logoutBtn.addEventListener('click', async function() {
+            try {
+                const response = await fetch('/api/logout', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.href = data.redirect;
+                }
+            } catch (error) {
+                console.error('Error al cerrar sesión:', error);
+                // Redirigir de todas formas
+                window.location.href = '/login';
+            }
+        });
+
+        // Inicializar aplicación cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+        });
+    </script>
+</body>
+</html>
