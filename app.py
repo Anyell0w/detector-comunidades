@@ -16,6 +16,7 @@ detector = CommunityDetector()
 # Archivo de base de datos de usuarios
 USERS_DB_FILE = './users.json'
 
+
 def init_users_db():
     """Inicializa la base de datos de usuarios si no existe"""
     if not os.path.exists(USERS_DB_FILE):
@@ -38,6 +39,7 @@ def init_users_db():
         print("Admin: admin/admin123")
         print("User: user/user123")
 
+
 def load_users_db():
     """Carga la base de datos de usuarios"""
     try:
@@ -47,17 +49,17 @@ def load_users_db():
         init_users_db()
         return load_users_db()
 
+
 def save_users_db(users_data):
-    """Guarda la base de datos de usuarios"""
     with open(USERS_DB_FILE, 'w') as f:
         json.dump(users_data, f, indent=2)
 
+
 def hash_password(password):
-    """Hashea una contraseña"""
     return hashlib.sha256(password.encode()).hexdigest()
 
+
 def authenticate_user(username, password):
-    """Autentica un usuario"""
     users = load_users_db()
     if username in users:
         stored_password = users[username]['password']
@@ -68,6 +70,7 @@ def authenticate_user(username, password):
             return users[username]
     return None
 
+
 def require_login(f):
     """Decorador para requerir login"""
     def wrapper(*args, **kwargs):
@@ -77,8 +80,8 @@ def require_login(f):
     wrapper.__name__ = f.__name__
     return wrapper
 
+
 def require_admin(f):
-    """Decorador para requerir rol admin"""
     def wrapper(*args, **kwargs):
         if 'user' not in session:
             return jsonify({'error': 'No autenticado', 'redirect': '/login'}), 401
@@ -88,12 +91,14 @@ def require_admin(f):
     wrapper.__name__ = f.__name__
     return wrapper
 
+
 @app.route('/')
 def index():
     """Página principal - redirige según autenticación"""
     if 'user' not in session:
         return redirect(url_for('login'))
     return render_template('index.html')
+
 
 @app.route('/login')
 def login():
@@ -102,15 +107,16 @@ def login():
         return redirect(url_for('index'))
     return render_template('login.html')
 
+
 @app.route('/api/login', methods=['POST'])
 def api_login():
     """Endpoint para autenticación"""
     username = request.json.get('username')
     password = request.json.get('password')
-    
+
     if not username or not password:
         return jsonify({'error': 'Usuario y contraseña son requeridos'}), 400
-    
+
     user = authenticate_user(username, password)
     if user:
         session['user'] = {
@@ -126,17 +132,20 @@ def api_login():
     else:
         return jsonify({'error': 'Credenciales inválidas'}), 401
 
+
 @app.route('/api/logout', methods=['POST'])
 def api_logout():
     """Endpoint para cerrar sesión"""
     session.pop('user', None)
     return jsonify({'success': True, 'redirect': '/login'})
 
+
 @app.route('/api/current_user', methods=['GET'])
 @require_login
 def current_user():
     """Obtiene información del usuario actual"""
     return jsonify({'user': session['user']})
+
 
 @app.route('/api/load_dataset', methods=['POST'])
 @require_admin
@@ -167,6 +176,7 @@ def load_dataset():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/api/detect_communities', methods=['POST'])
 @require_admin
@@ -220,6 +230,7 @@ def detect_communities():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/api/view_latest_result', methods=['GET'])
 @require_login
 def view_latest_result():
@@ -237,10 +248,10 @@ def view_latest_result():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/api/export_results', methods=['GET'])
-@require_admin
+@require_login
 def export_results():
-    """Exporta los resultados actuales - Solo admin"""
     if detector.communities is None:
         return jsonify({'error': 'No hay resultados para exportar'}), 400
 
@@ -249,6 +260,7 @@ def export_results():
         return jsonify({'success': True, 'filepath': filepath})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/api/graph_data', methods=['GET'])
 @require_login
@@ -282,6 +294,7 @@ def get_graph_data():
         'edges': edges
     })
 
+
 @app.route('/api/users', methods=['GET'])
 @require_admin
 def get_users():
@@ -297,6 +310,7 @@ def get_users():
         }
     return jsonify({'users': safe_users})
 
+
 @app.route('/api/users', methods=['POST'])
 @require_admin
 def create_user():
@@ -305,28 +319,29 @@ def create_user():
     username = data.get('username')
     password = data.get('password')
     role = data.get('role', 'user')
-    
+
     if not username or not password:
         return jsonify({'error': 'Usuario y contraseña son requeridos'}), 400
-    
+
     if role not in ['admin', 'user']:
         return jsonify({'error': 'Rol inválido'}), 400
-    
+
     users = load_users_db()
-    
+
     if username in users:
         return jsonify({'error': 'El usuario ya existe'}), 400
-    
+
     users[username] = {
         'password': hash_password(password),
         'role': role,
         'created_at': datetime.now().isoformat(),
         'last_login': None
     }
-    
+
     save_users_db(users)
-    
+
     return jsonify({'success': True, 'message': 'Usuario creado exitosamente'})
+
 
 @app.route('/api/users/<username>', methods=['DELETE'])
 @require_admin
@@ -334,16 +349,17 @@ def delete_user(username):
     """Elimina un usuario - Solo admin"""
     if username == session['user']['username']:
         return jsonify({'error': 'No puedes eliminar tu propia cuenta'}), 400
-    
+
     users = load_users_db()
-    
+
     if username not in users:
         return jsonify({'error': 'Usuario no encontrado'}), 404
-    
+
     del users[username]
     save_users_db(users)
-    
+
     return jsonify({'success': True, 'message': 'Usuario eliminado exitosamente'})
+
 
 # Crear directorios necesarios
 os.makedirs('static', exist_ok=True)

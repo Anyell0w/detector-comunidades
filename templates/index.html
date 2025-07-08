@@ -46,12 +46,10 @@
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <!-- Barra de progreso -->
     <div id="progress-container" class="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50 hidden">
         <div id="progress-bar" class="h-full bg-indigo-600 progress-bar" style="width: 0%"></div>
     </div>
 
-    <!-- Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-6">
@@ -62,16 +60,14 @@
                     <div class="ml-4">
                         <span id="user-info" class="text-sm text-gray-600">
                             <span id="user-role" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                <!-- Role will be set by JavaScript -->
-                            </span>
+                                </span>
                             <span id="user-name" class="ml-2 font-medium">
-                                <!-- Username will be set by JavaScript -->
-                            </span>
+                                </span>
                         </span>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <button id="export-btn" class="admin-only inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <button id="export-btn" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
                         </svg>
@@ -95,9 +91,7 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- User Info Banner -->
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -109,14 +103,12 @@
                     <p class="text-sm text-blue-800">
                         <span class="font-medium">Bienvenido</span> - 
                         <span id="user-welcome-role">
-                            <!-- Role description will be set by JavaScript -->
-                        </span>
+                            </span>
                     </p>
                 </div>
             </div>
         </div>
 
-        <!-- Dataset Selection (Admin Only) -->
         <div id="dataset-section" class="admin-only bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
             <h2 class="text-lg font-medium text-gray-900 mb-4">Seleccionar Dataset</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -144,7 +136,6 @@
             </div>
         </div>
 
-        <!-- Graph Info -->
         <div id="graph-info" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8 hidden fade-in">
             <h2 class="text-lg font-medium text-gray-900 mb-4">Información del Grafo</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -167,7 +158,6 @@
             </div>
         </div>
 
-        <!-- Algorithm Selection (Admin Only) -->
         <div id="algorithm-section" class="admin-only bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8 hidden fade-in">
             <h2 class="text-lg font-medium text-gray-900 mb-4">Algoritmo de Detección</h2>
             <div class="space-y-4">
@@ -195,9 +185,57 @@
             </div>
         </div>
 
-        <!-- Results -->
+        <div id="user-management-section" class="admin-only bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8 hidden fade-in">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Gestión de Usuarios</h2>
+            
+            <div class="mb-6">
+                <h3 class="text-md font-medium text-gray-800 mb-3">Crear Nuevo Usuario</h3>
+                <form id="create-user-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    <div>
+                        <label for="new-username" class="block text-sm font-medium text-gray-700">Usuario</label>
+                        <input type="text" id="new-username" name="username" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="new-password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                        <input type="password" id="new-password" name="password" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="new-role" class="block text-sm font-medium text-gray-700">Rol</label>
+                        <select id="new-role" name="role" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <option value="user">Usuario</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-3">
+                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Crear Usuario
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div>
+                <h3 class="text-md font-medium text-gray-800 mb-3">Usuarios Existentes</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Creado</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Último Login</th>
+                                <th scope="col" class="relative px-6 py-3"><span class="sr-only">Acciones</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body" class="bg-white divide-y divide-gray-200">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
         <div id="results-section" class="hidden fade-in">
-            <!-- Metrics -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
                 <h2 class="text-lg font-medium text-gray-900 mb-4">Métricas de Evaluación</h2>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -224,7 +262,6 @@
                 </div>
             </div>
 
-            <!-- Visualization -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
                 <h2 class="text-lg font-medium text-gray-900 mb-4">Visualización</h2>
                 <div class="text-center">
@@ -232,22 +269,18 @@
                 </div>
             </div>
 
-            <!-- Communities Details -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h2 class="text-lg font-medium text-gray-900 mb-4">Detalles de Comunidades</h2>
                 <div id="communities-list" class="space-y-4">
-                    <!-- Communities will be dynamically added here -->
-                </div>
+                    </div>
             </div>
         </div>
 
-        <!-- Loading State -->
         <div id="loading-state" class="hidden text-center py-12">
             <div class="loading-spinner mx-auto mb-4"></div>
             <p class="text-gray-600">Procesando...</p>
         </div>
 
-        <!-- Error State -->
         <div id="error-state" class="hidden bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
             <div class="flex">
                 <div class="flex-shrink-0">
@@ -284,6 +317,11 @@
         const exportBtn = document.getElementById('export-btn');
         const viewLatestBtn = document.getElementById('view-latest-btn');
         const logoutBtn = document.getElementById('logout-btn');
+        
+        // New elements for user management
+        const userManagementSection = document.getElementById('user-management-section');
+        const createUserForm = document.getElementById('create-user-form');
+        const usersTableBody = document.getElementById('users-table-body');
 
         // Inicializar aplicación
         async function initApp() {
@@ -294,6 +332,9 @@
                 if (data.user) {
                     currentUser = data.user;
                     setupUserInterface();
+                    if (currentUser.role === 'admin') {
+                        await fetchUsers(); // Fetch users only if admin
+                    }
                 } else {
                     window.location.href = '/login';
                 }
@@ -361,6 +402,7 @@
         }
 
         function formatDate(dateString) {
+            if (!dateString) return '-';
             const date = new Date(dateString);
             return date.toLocaleDateString('es-ES', {
                 year: 'numeric',
@@ -373,10 +415,10 @@
 
         function displayResults(data, isLatest = false) {
             // Actualizar métricas
-            document.getElementById('modularity-value').textContent = data.metrics.modularity;
-            document.getElementById('communities-count').textContent = data.metrics.num_communities;
-            document.getElementById('avg-size').textContent = Math.round(data.metrics.total_nodes / data.metrics.num_communities);
-            document.getElementById('largest-community').textContent = Math.max(...data.metrics.community_sizes);
+            document.getElementById('modularity-value').textContent = data.metrics.modularity !== undefined ? data.metrics.modularity.toFixed(4) : '-';
+            document.getElementById('communities-count').textContent = data.metrics.num_communities !== undefined ? data.metrics.num_communities : '-';
+            document.getElementById('avg-size').textContent = (data.metrics.total_nodes && data.metrics.num_communities) ? Math.round(data.metrics.total_nodes / data.metrics.num_communities) : '-';
+            document.getElementById('largest-community').textContent = (data.metrics.community_sizes && data.metrics.community_sizes.length > 0) ? Math.max(...data.metrics.community_sizes) : '-';
             
             // Actualizar timestamp
             if (data.timestamp) {
@@ -395,49 +437,53 @@
             if (data.graph_name) {
                 document.getElementById('graph-name').textContent = data.graph_name;
             }
-            if (data.metrics.total_nodes) {
+            if (data.metrics.total_nodes !== undefined) {
                 document.getElementById('nodes-count').textContent = data.metrics.total_nodes;
             }
-            if (data.metrics.total_edges) {
+            if (data.metrics.total_edges !== undefined) {
                 document.getElementById('edges-count').textContent = data.metrics.total_edges;
             }
-            if (data.metrics.graph_density) {
-                document.getElementById('density-value').textContent = data.metrics.graph_density;
+            if (data.metrics.graph_density !== undefined) {
+                document.getElementById('density-value').textContent = data.metrics.graph_density.toFixed(4);
             }
             
             // Mostrar detalles de comunidades
             const communitiesList = document.getElementById('communities-list');
             communitiesList.innerHTML = '';
             
-            data.communities.forEach((community, index) => {
-                const communityDiv = document.createElement('div');
-                communityDiv.className = 'bg-gray-50 rounded-lg p-4';
-                communityDiv.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <h3 class="font-medium text-gray-900">Comunidad ${index + 1}</h3>
-                        <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded">${community.size} miembros</span>
-                    </div>
-                    <div class="grid grid-cols-3 gap-4 text-sm">
-                        <div>
-                            <span class="text-gray-500">Densidad:</span>
-                            <span class="font-medium">${community.density}</span>
+            if (data.communities && data.communities.length > 0) {
+                data.communities.forEach((community, index) => {
+                    const communityDiv = document.createElement('div');
+                    communityDiv.className = 'bg-gray-50 rounded-lg p-4';
+                    communityDiv.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-medium text-gray-900">Comunidad ${index + 1}</h3>
+                            <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded">${community.size} miembros</span>
                         </div>
-                        <div>
-                            <span class="text-gray-500">Clustering:</span>
-                            <span class="font-medium">${community.avg_clustering}</span>
+                        <div class="grid grid-cols-3 gap-4 text-sm">
+                            <div>
+                                <span class="text-gray-500">Densidad:</span>
+                                <span class="font-medium">${community.density !== undefined ? community.density.toFixed(4) : '-'}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Clustering:</span>
+                                <span class="font-medium">${community.avg_clustering !== undefined ? community.avg_clustering.toFixed(4) : '-'}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Grado Promedio:</span>
+                                <span class="font-medium">${community.avg_degree !== undefined ? community.avg_degree.toFixed(2) : '-'}</span>
+                            </div>
                         </div>
-                        <div>
-                            <span class="text-gray-500">Grado Promedio:</span>
-                            <span class="font-medium">${community.avg_degree}</span>
+                        <div class="mt-2">
+                            <span class="text-gray-500 text-sm">Miembros:</span>
+                            <span class="text-sm">${community.members.join(', ')}</span>
                         </div>
-                    </div>
-                    <div class="mt-2">
-                        <span class="text-gray-500 text-sm">Miembros:</span>
-                        <span class="text-sm">${community.members.join(', ')}</span>
-                    </div>
-                `;
-                communitiesList.appendChild(communityDiv);
-            });
+                    `;
+                    communitiesList.appendChild(communityDiv);
+                });
+            } else {
+                communitiesList.innerHTML = '<p class="text-gray-500 text-center">No hay detalles de comunidades disponibles.</p>';
+            }
             
             // Mostrar secciones relevantes
             showElement(graphInfo);
@@ -447,6 +493,102 @@
                 exportBtn.classList.remove('hidden');
             }
         }
+
+        // --- User Management Functions ---
+        async function fetchUsers() {
+            try {
+                const response = await fetch('/api/users');
+                const data = await response.json();
+
+                if (response.status === 401 || response.status === 403) {
+                    showError(data.error || 'No autorizado para ver usuarios.');
+                    return;
+                }
+
+                if (data.users) {
+                    renderUsersTable(data.users);
+                } else {
+                    showError(data.error || 'Error al cargar usuarios.');
+                }
+            } catch (error) {
+                showError('Error de conexión al cargar usuarios: ' + error.message);
+            }
+        }
+
+        function renderUsersTable(users) {
+            usersTableBody.innerHTML = '';
+            for (const username in users) {
+                const user = users[username];
+                const row = document.createElement('tr');
+                row.className = 'bg-white';
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${username}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">${user.role}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(user.created_at)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(user.last_login)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        ${username !== currentUser.username ? `<button data-username="${username}" class="delete-user-btn text-red-600 hover:text-red-900">Eliminar</button>` : '<span class="text-gray-400"> (Tu)</span>'}
+                    </td>
+                `;
+                usersTableBody.appendChild(row);
+            }
+
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-user-btn').forEach(button => {
+                button.addEventListener('click', handleDeleteUser);
+            });
+        }
+
+        async function handleCreateUser(event) {
+            event.preventDefault();
+            const formData = new FormData(createUserForm);
+            const userData = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(data.message);
+                    createUserForm.reset();
+                    fetchUsers(); // Refresh the list
+                } else {
+                    showError(data.error || 'Error al crear usuario.');
+                }
+            } catch (error) {
+                showError('Error de conexión al crear usuario: ' + error.message);
+            }
+        }
+
+        async function handleDeleteUser(event) {
+            const usernameToDelete = event.target.dataset.username;
+            if (!confirm(`¿Estás seguro de que quieres eliminar al usuario ${usernameToDelete}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/users/${usernameToDelete}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(data.message);
+                    fetchUsers(); // Refresh the list
+                } else {
+                    showError(data.error || 'Error al eliminar usuario.');
+                }
+            } catch (error) {
+                showError('Error de conexión al eliminar usuario: ' + error.message);
+            }
+        }
+
 
         // Event listeners para datasets (solo admin)
         datasetBtns.forEach(btn => {
@@ -489,7 +631,7 @@
                         // Actualizar información del grafo
                         document.getElementById('nodes-count').textContent = data.graph_info.nodes;
                         document.getElementById('edges-count').textContent = data.graph_info.edges;
-                        document.getElementById('density-value').textContent = data.graph_info.density;
+                        document.getElementById('density-value').textContent = data.graph_info.density.toFixed(4);
                         document.getElementById('graph-name').textContent = data.graph_info.name;
                         
                         // Mostrar secciones
@@ -638,6 +780,9 @@
                 window.location.href = '/login';
             }
         });
+
+        // Add event listener for create user form
+        createUserForm.addEventListener('submit', handleCreateUser);
 
         // Inicializar aplicación cuando se carga la página
         document.addEventListener('DOMContentLoaded', function() {
